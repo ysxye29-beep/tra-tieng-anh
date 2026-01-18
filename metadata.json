@@ -1,0 +1,7 @@
+{
+  "name": "Copy of FlashVocab",
+  "description": "Instant English word analysis with deep linguistic breakdown, mnemonics, and examples using Gemini Flash.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
