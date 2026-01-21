@@ -298,7 +298,7 @@ export const FlashcardPage: React.FC<FlashcardPageProps> = ({
           <div className="flex bg-gray-900 p-1 rounded-xl border border-gray-800 shadow-sm"><button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-gray-800 text-emerald-400' : 'text-gray-500'}`}><List size={20} /></button><button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-gray-800 text-emerald-400' : 'text-gray-500'}`}><LayoutGrid size={20} /></button></div>
       </div>
 
-      <div className="space-y-12">
+      <div className="space-y-12 pb-20">
           {words.length > 0 && (
             <div className="space-y-4">
                 <div className="flex items-center gap-2 px-2 text-gray-500 uppercase text-[10px] font-black tracking-[0.2em] mb-2"><BookOpen size={14} /> TỪ VỰNG ({words.filter(w => filterLevel === null || (filterLevel === 4 ? (w.srs_level||0) >= 4 : (w.srs_level||0) === filterLevel)).length})</div>
@@ -352,4 +352,21 @@ export const FlashcardPage: React.FC<FlashcardPageProps> = ({
                                 <div key={s.sentence} className={`group bg-gray-900 hover:bg-gray-800 border ${isMastered ? 'border-emerald-900/50 hover:border-emerald-500/30' : 'border-gray-800 hover:border-gray-600'} rounded-2xl p-5 transition-all duration-300 cursor-pointer relative flex flex-col h-full`} onClick={() => onSelectSentence(s)}>
                                     <div className="flex justify-between items-start mb-3"><h3 className={`text-lg font-bold transition-colors truncate pr-2 ${isMastered ? 'text-emerald-400' : 'text-white'}`}>{s.sentence}</h3><div className="flex items-center gap-2"><button onClick={(e) => { e.stopPropagation(); onRemoveSentence(s.sentence); }} className="text-gray-600 hover:text-red-400 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={16} /></button></div></div>
                                     <p className="text-gray-400 text-sm line-clamp-2 mb-4 flex-grow font-medium">{s.meaning_vi}</p>
-                                    <div className="flex i
+                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-800"><div className="flex items-center gap-2"><span className="text-xs font-black uppercase text-blue-500">{s.naturalness_score}% Natural</span></div><div className="flex gap-1">{[...Array(5)].map((_, i) => (<div key={i} className={`w-1.5 h-1.5 rounded-full ${i < (s.srs_level || 0) ? 'bg-blue-500' : 'bg-gray-800'}`}></div>))}</div></div>
+                                </div>
+                            ));
+                        })}
+                </div>
+            </div>
+          )}
+
+          {totalItemsCount === 0 && (
+            <div className="py-20 flex flex-col items-center justify-center text-gray-800 opacity-20 select-none">
+               <Info size={64} className="mb-4" />
+               <h3 className="text-xl font-black uppercase tracking-widest">Chưa có dữ liệu lưu trữ</h3>
+            </div>
+          )}
+      </div>
+    </div>
+  );
+};
