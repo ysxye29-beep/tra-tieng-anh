@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { WordData, SentenceData, PronunciationFeedback } from "../types";
+import { WordData, SentenceData, PronunciationFeedback, SentenceEvaluation } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -53,6 +53,17 @@ const sentenceSchema = {
   required: ["sentence", "meaning_vi", "grammar_breakdown", "usage_context", "naturalness_score", "similar_sentences"]
 };
 
+const evaluationSchema = {
+  type: Type.OBJECT,
+  properties: {
+    score: { type: Type.NUMBER, description: "Score from 0 to 100" },
+    corrected_sentence: { type: Type.STRING, description: "The improved/correct version of the sentence" },
+    explanation_vi: { type: Type.STRING, description: "Explanation of errors and tips in Vietnamese" },
+    is_natural: { type: Type.BOOLEAN, description: "Whether the sentence sounds like a native speaker" },
+  },
+  required: ["score", "corrected_sentence", "explanation_vi", "is_natural"],
+};
+
 const pronunciationSchema = {
   type: Type.OBJECT,
   properties: {
@@ -81,7 +92,6 @@ export const lookupWord = async (input: string): Promise<WordData> => {
       responseMimeType: "application/json",
       responseSchema: wordSchema,
       temperature: 0,
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
   
@@ -105,13 +115,28 @@ export const lookupSentence = async (input: string): Promise<SentenceData> => {
       responseMimeType: "application/json",
       responseSchema: sentenceSchema,
       temperature: 0,
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
   
   const result = JSON.parse(response.text) as SentenceData;
   sentenceCache.set(normalized, result);
   return result;
+};
+
+export const evaluateSentence = async (targetWord: string, userSentence: string): Promise<SentenceEvaluation> => {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
+    contents: `Evaluate this English sentence using the word "${targetWord}": "${userSentence}"`,
+    config: {
+      systemInstruction: `You are an English teacher. 
+      Grade the sentence (0-100), provide a corrected version, and explain errors in Vietnamese.
+      Be encouraging but precise. JSON only.`,
+      responseMimeType: "application/json",
+      responseSchema: evaluationSchema,
+      temperature: 0,
+    }
+  });
+  return JSON.parse(response.text) as SentenceEvaluation;
 };
 
 export const checkPronunciation = async (target: string, base64Audio: string, mimeType: string): Promise<PronunciationFeedback> => {
@@ -128,7 +153,6 @@ export const checkPronunciation = async (target: string, base64Audio: string, mi
       responseMimeType: "application/json",
       responseSchema: pronunciationSchema,
       temperature: 0,
-      thinkingConfig: { thinkingBudget: 0 },
     }
   });
   return JSON.parse(response.text) as PronunciationFeedback;

@@ -39,3 +39,10 @@ export interface PronunciationFeedback {
   feedback_vi: string;
   detected_speech: string;
 }
+
+export interface SentenceEvaluation {
+  score: number;
+  corrected_sentence: string;
+  explanation_vi: string;
+  is_natural: boolean;
+}
